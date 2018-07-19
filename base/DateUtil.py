@@ -25,7 +25,3 @@ def getPreDayYMD(num=1, startdate=None):
     oneday=datetime.timedelta(days=num)
     d=today-oneday
     return str(d)
-
-import moment
-
-print(moment.now().add(1, 'days').format('YYYY-M-D'))

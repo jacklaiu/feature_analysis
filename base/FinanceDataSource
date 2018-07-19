@@ -1,2 +1,72 @@
-import tushare
+import tushare as ts
+from base import DateUtil as du
+from base import HtmlGetter as hg
 
+OpenList = ts.trade_cal()
+
+def getOpenDates():
+    dates = []
+    rows = OpenList[OpenList.isOpen == 1].values[-888:]
+    for row in rows:
+        dates.append(row[0])
+    return dates
+
+OpenDates = getOpenDates()
+
+def isOpen(date):
+    try:
+        isOpen = OpenList[OpenList.calendarDate == date].values[0][1]
+    except:
+        return None
+    if (isOpen == 1):
+        return True
+    return False
+
+def preOpenDate(date, leftCount=1):
+    index = 0
+    for d in OpenDates:
+        if d == date:
+            return OpenDates[index - leftCount]
+        index = index + 1
+    return None
+
+def nextOpenDate(date, rightCount=1):
+    index = 0
+    for d in OpenDates:
+        if d == date:
+            if index + rightCount < OpenDates.__len__() -1:
+                return OpenDates[index + rightCount]
+            else:
+                break
+        index = index + 1
+    return None
+
+def get_today_open2close_chg(code, date=du.getYMD()):
+    date0 = preOpenDate(date, 1)
+    d = ts.get_k_data(code=code, start=date0, end=date0)
+    dc = d['close']
+    do = d['open']
+    ye_open = do.values[0]
+    ye_close = dc.values[0]
+    ret = round(((float(ye_close) - float(ye_open)) / float(ye_open)), 4) * 100
+    return ret
+
+def get_ye_chg(code, date=du.getYMD()):
+    date0 = preOpenDate(date, 1)
+    date1 = preOpenDate(date, 2)
+    d = ts.get_k_data(code=code, start=date1, end=date0)
+    dd = d['close']
+    ty_close = dd.values[0]
+    ye_close = dd.values[1]
+    ret = round(((float(ye_close) - float(ty_close)) / float(ty_close)), 4) * 100
+    return ret
+
+def get_continuous_rise_day_count(code, date=du.getYMD()):
+    count = 0
+    #chg = get_ye_chg(code, preOpenDate(date, count))
+    chg = get_today_open2close_chg(code, preOpenDate(date, count))
+    while chg > 0:
+        count = count + 1
+        #chg = get_ye_chg(code, preOpenDate(date, count))
+        chg = get_today_open2close_chg(code, preOpenDate(date, count))
+    return count
