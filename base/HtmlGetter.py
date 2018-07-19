@@ -7,7 +7,7 @@ def getCodesFromWencai(w):
     url = 'https://www.iwencai.com/stockpick/search?typed=1&preParams=&ts=1&f=3&qs=pc_~soniu~stock~stock~history~query&selfsectsn=&querytype=stock&searchfilter=&tid=stockpick&w=' + w
     browser = None
     try:
-        browser = webdriver.Chrome(os.path.abspath('.') + '\driver\chromedriver.exe')
+        browser = webdriver.Chrome(os.path.abspath(os.path.dirname(os.path.dirname(__file__))) + '\driver\chromedriver.exe')
         browser.get(url)
         time.sleep(4)
         browser.implicitly_wait(1)
