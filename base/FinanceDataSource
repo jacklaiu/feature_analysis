@@ -13,6 +13,10 @@ def getOpenDates():
 
 OpenDates = getOpenDates()
 
+def get_k_data(df, start, end):
+    ret = df[(df['date'] >= start) & (df['date'] <= end)]
+    return ret
+
 def isOpen(date):
     try:
         isOpen = OpenList[OpenList.calendarDate == date].values[0][1]
@@ -42,8 +46,12 @@ def nextOpenDate(date, rightCount=1):
     return None
 
 def get_today_open2close_chg(code, date=du.getYMD()):
-    date0 = preOpenDate(date, 1)
-    d = ts.get_k_data(code=code, start=date0, end=date0)
+    start = preOpenDate(date, 1)
+    end = start
+    if isinstance(code, str):
+        d = ts.get_k_data(code=code, start=start, end=end)
+    else:
+        d = get_k_data(df=code, start=start, end=end)
     dc = d['close']
     do = d['open']
     ye_open = do.values[0]
@@ -52,9 +60,12 @@ def get_today_open2close_chg(code, date=du.getYMD()):
     return ret
 
 def get_ye_chg(code, date=du.getYMD()):
-    date0 = preOpenDate(date, 1)
-    date1 = preOpenDate(date, 2)
-    d = ts.get_k_data(code=code, start=date1, end=date0)
+    start = preOpenDate(date, 2)
+    end = preOpenDate(date, 1)
+    if isinstance(code, str):
+        d = ts.get_k_data(code=code, start=start, end=end)
+    else:
+        d = get_k_data(df=code, start=start, end=end)
     dd = d['close']
     ty_close = dd.values[0]
     ye_close = dd.values[1]
@@ -70,3 +81,29 @@ def get_continuous_rise_day_count(code, date=du.getYMD()):
         #chg = get_ye_chg(code, preOpenDate(date, count))
         chg = get_today_open2close_chg(code, preOpenDate(date, count))
     return count
+
+def get_ye_qrr(code, date=du.getYMD()):
+    start = preOpenDate(date, 6)
+    end = preOpenDate(date, 1)
+    if isinstance(code, str):
+        d = ts.get_k_data(code=code, start=start, end=end)
+    else:
+        d = get_k_data(df=code, start=start, end=end)
+    dd = d['volume']
+    len = dd.values.__len__()
+    total_volume = 0
+    ye_volume = 0
+    count = 0
+    for row in dd.values:
+        if count == len - 1:
+            ye_volume = row
+        else:
+            total_volume = total_volume + row
+        count = count + 1
+    base = total_volume / (4*60*5)
+    today = ye_volume / (4*60)
+    ret = round(float(today/base), 2)
+    return ret
+
+dataf = ts.get_k_data('002636', start="2018-07-06", end="2018-07-20")
+print(get_ye_qrr(dataf))

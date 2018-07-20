@@ -44,5 +44,5 @@ def getCodesFromWencai(w):
     finally:
         browser.quit()
 
-codes = getCodesFromWencai("按昨日涨跌幅降序排序前10")
-print(codes)
+# codes = getCodesFromWencai("按昨日涨跌幅降序排序前10")
+# print(codes)
