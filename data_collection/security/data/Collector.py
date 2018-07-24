@@ -29,6 +29,11 @@ def caculateMarketAnd2DB():
         open_yzdt = 0
         ye_dt = 0
         ye_zrzt = 0
+        _2lb = 0
+        _3lb = 0
+        _4lb = 0
+        _5lb = 0
+        _6lb = 0
         for item in arr:
             code = item['code']
             try:
@@ -54,19 +59,30 @@ def caculateMarketAnd2DB():
                 else:
                     ty_item = ty_items[0]
 
-            if(is_open_yzzt(item, ye_item) == True):
-                open_yzzt = open_yzzt + 1
-            if (is_open_yzdt(item, ye_item) == True):
-                open_yzdt = open_yzdt + 1
-            if (is_ye_dt(ye_item, ty_item) == True):
-                ye_dt = ye_dt + 1
-            if (is_ye_zrzt(ye_item, ty_item) == True):
-                ye_zrzt = ye_zrzt + 1
-            print("-->date: " + date)
+            if(is_open_yzzt(item, ye_item) == True): open_yzzt = open_yzzt + 1
+            if (is_open_yzdt(item, ye_item) == True): open_yzdt = open_yzdt + 1
+            if (is_ye_dt(ye_item, ty_item) == True): ye_dt = ye_dt + 1
+            if (is_ye_zrzt(ye_item, ty_item) == True): ye_zrzt = ye_zrzt + 1
+
+            lb = is_lb(code, date, item, ye_item, ty_item)
+
+            if (lb == 6):
+                _6lb = _6lb + 1
+            elif (lb == 5):
+                _5lb = _5lb + 1
+            elif (lb == 4):
+                _4lb = _4lb + 1
+            elif (lb == 3):
+                _3lb = _3lb + 1
+            elif (lb == 2):
+                _2lb = _2lb + 1
+
+            print("Code: " + code + " Date: " + date)
 
         print('Date: ' + date + ' open_yzzt: ' + str(open_yzzt) + ' open_yzdt: ' + str(open_yzdt) + ' ye_dt: ' + str(ye_dt) + ' ye_zrzt:' + str(ye_zrzt))
         dao.update("delete from market_env where date=%s", (date))
-        dao.update("insert into market_env(date, open_yzzt, open_yzdt, ye_dt, ye_zrzt) values(%s,%s,%s,%s,%s)", (date, open_yzzt, open_yzdt, ye_dt, ye_zrzt))
+        dao.update("insert into market_env(date, open_yzzt, open_yzdt, ye_dt, ye_zrzt, 2lb, 3lb, 4lb, 5lb, 6lb) values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
+                   (date, open_yzzt, open_yzdt, ye_dt, ye_zrzt, _2lb, _3lb, _4lb, _5lb, _6lb))
 
         # for item in arr:
         #     code = item['code']
@@ -88,6 +104,38 @@ def caculateMarketAnd2DB():
         #
         #     count = count + 1
         # print('Date: ' + date + ' open_yzzt: ' + str(open_yzzt) + ' open_yzdt: ' + str(open_yzdt) + ' ye_dt: ' + str(ye_dt) + ' ye_zrzt:' + str(ye_zrzt))
+
+def is_lb(code, date, item, ye_item, ty_item):
+    close = float(item['close'])
+    pre_close = float(ye_item['close'])
+    ty_close = float(ty_item['close'])
+    rate = round(float((close - pre_close) / pre_close) * 100, 2)
+    ye_rate = round(float((pre_close - ty_close) / ty_close) * 100, 2)
+    if rate < 9.89 or ye_rate < 9.89: return 0
+
+    count = 0
+    df = ts.get_k_data(code, fd.preOpenDate(date, 30), date)
+    len = df['close'].values.__len__()
+    while True:
+        if code == '000760' and date == '2018-07-20':
+            print()
+        try:
+            close = df['close'].values[len-count-1]
+        except:
+            return 2
+        try:
+            pre_close = df['close'].values[len-count-2]
+        except:
+            return 2
+        rate = round(float((close - pre_close)/pre_close)*100, 2)
+        if rate >= 9.89:
+            count = count + 1
+            if count >=6:
+                break
+            continue
+        else:
+            break
+    return count
 
 def is_open_yzzt(item, ye_item):
     open = float(item['open'])
@@ -127,8 +175,6 @@ def is_ye_zrzt(ye_item, ty_item):
     else:
         return False
 
-
-
 def crawlSecurityData(endDate, daysCount):
     securities = fd.get_all_securities()
     #endDate = "2018-07-20"
@@ -151,7 +197,6 @@ def crawlSecurityData(endDate, daysCount):
         dao.updatemany(
             "insert into security_data(code, date, open, close, high, low, volume) values(%s,%s,%s,%s,%s,%s,%s)",
             arr_values)
-        time.sleep(0.5)
 
 caculateMarketAnd2DB()
 
