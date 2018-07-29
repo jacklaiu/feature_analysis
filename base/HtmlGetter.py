@@ -4,45 +4,78 @@ import os
 import time
 
 def getCodesFromWencai(w):
+    soup = getSoupFromWencai(w)
+    eles = soup.select('#resultWrap .static_con_outer .tbody_table tr td.item div.em')
+    index = 0
+    arr = []
+    while index < eles.__len__():
+        o_str = eles[index].text.strip()
+        if (o_str.isdigit()):
+            arr.append(o_str)
+        index = index + 1
+    return arr
+
+def getZhangTingReasonWords(code, date):
+    soup = getSoupFromWencai(code + "；" + date + "；" + "涨停原因")
+    eles = soup.select('#doctorPick .dp_pointonline_block_con .dp_pointonline_con .reason_con .reason_list .reason_item a')
+    elem = None
+    for e in eles:
+        title = e.get("title")
+        if date in title:
+            elem = e
+            break
+    kw = elem.text.strip()
+    kw = kw[1: elem.text.strip().__len__()]
+    return kw
+
+def getSoupFromWencai(w):
     url = 'https://www.iwencai.com/stockpick/search?typed=1&preParams=&ts=1&f=3&qs=pc_~soniu~stock~stock~history~query&selfsectsn=&querytype=stock&searchfilter=&tid=stockpick&w=' + w
     browser = None
     try:
-        browser = webdriver.Chrome(os.path.abspath(os.path.dirname(os.path.dirname(__file__))) + '\driver\chromedriver.exe')
+        browser = webdriver.Chrome(
+            os.path.abspath(os.path.dirname(os.path.dirname(__file__))) + '\driver\chromedriver.exe')
         browser.get(url)
-        time.sleep(4)
+        time.sleep(2)
         browser.implicitly_wait(1)
         try:
             isClicked = False
-            elem70 = browser.find_element_by_css_selector('#resultWrap #showPerpage select option[value="70"]')
+            elem70 = browser.find_element_by_css_selector('#table_foot_bar select option[value="70"]')
             if elem70 is not None and isClicked == False:
                 elem70.click()
                 isClicked = True
-            elem50 = browser.find_element_by_css_selector('#resultWrap #showPerpage select option[value="50"]')
+            elem50 = browser.find_element_by_css_selector('#table_foot_bar select option[value="50"]')
             if elem50 is not None and isClicked == False:
                 elem50.click()
                 isClicked = True
-            elem30 = browser.find_element_by_css_selector('#resultWrap #showPerpage select option[value="30"]')
+            elem30 = browser.find_element_by_css_selector('#table_foot_bar select option[value="30"]')
             if elem30 is not None and isClicked == False:
                 elem30.click()
             time.sleep(5)
-        except:
+        except Exception as e:
             print("")
         html = browser.execute_script("return document.documentElement.outerHTML")
         soup = BeautifulSoup(html, "html.parser")
-        eles = soup.select('#resultWrap .static_con_outer .tbody_table tr td.item div.em')
-        index = 0
-        arr = []
-        while index < eles.__len__():
-            o_str = eles[index].text.strip()
-            if (o_str.isdigit()):
-                arr.append(o_str)
-            index = index + 1
-        return arr
-    except Exception as e:
-        browser.quit()
+    except:
+        browser.close()
         return None
     finally:
-        browser.quit()
+        browser.close()
+    return soup
+
+def getElemsFromWencai(w, selector):
+    soup = getSoupFromWencai(w)
+    eles = soup.select(selector)
+    return eles
+
+def getArrayFromWencai(w, selector):
+    elems = getElemsFromWencai(w, selector)
+    arr = []
+    for elem in elems:
+        str = elem.text.strip()
+        arr.append(str)
+    return arr
+
 
 # codes = getCodesFromWencai("按昨日涨跌幅降序排序前10")
 # print(codes)
+

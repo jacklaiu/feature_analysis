@@ -2,6 +2,19 @@ import os
 import tushare as ts
 from base import DateUtil as du
 
+def get_concept_securities():
+    df = ts.get_concept_classified()
+    values = df.values
+    concept_code_dict = {}
+    for row in values:
+        code = row[0]
+        c_name = row[2]
+        if c_name not in concept_code_dict:
+            concept_code_dict.setdefault(c_name, [code])
+        else:
+            concept_code_dict[c_name].append(code)
+    return concept_code_dict
+
 def get_all_securities():
     f = open(os.path.dirname(__file__) + "/all_securities.txt", "r")
     str = f.read()
@@ -46,11 +59,16 @@ def preOpenDate(date, leftCount=1):
     return None
 
 def getLastestOpenDate(date=du.getYMD()):
+    hms = du.getHMS()
+    if hms >= '15:00:00' and isOpen(date):
+        return date
+    if hms < '15:00:00' and isOpen(date):
+        return preOpenDate(date, 1)
     count = 0
     while True:
         count = count + 1
         if isOpen(date) == False:
-            date = preOpenDate(date, count)
+            date = du.getPreDayYMD(1, date)
             continue
         else:
             break
@@ -69,9 +87,7 @@ def nextOpenDate(date, rightCount=1):
     return None
 
 
-
-
-
+get_concept_securities()
 
 
 
