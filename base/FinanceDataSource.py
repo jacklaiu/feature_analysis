@@ -54,7 +54,7 @@ def preOpenDate(date, leftCount=1):
     index = 0
     for d in OpenDates:
         if d == date:
-            return OpenDates[index - leftCount]
+            return OpenDates[index - int(leftCount)]
         index = index + 1
     return None
 
