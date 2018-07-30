@@ -232,10 +232,14 @@ def crawlSecurityData_AtRear(dayCount):
         startDate = fd.nextOpenDate(max_date, 1)
     else:
         startDate = fd.preOpenDate(endDate, dayCount)
+    isFromHist = False
     if startDate > endDate: return
     for code in securities:
         count = 0
         df = ts.get_k_data(code, startDate, endDate)
+        if df.index.__len__() == 0:
+            isFromHist = True
+            df = ts.get_hist_data(code, startDate, endDate)
         arr_values = []
         while count < df.index.__len__():
             open = str(df['open'].values[count])
@@ -243,7 +247,10 @@ def crawlSecurityData_AtRear(dayCount):
             high = str(df['high'].values[count])
             low = str(df['low'].values[count])
             volume = str(df['volume'].values[count])
-            date = str(df['date'].values[count])
+            if isFromHist is True:
+                date = df.index[count]
+            else:
+                date = str(df['date'].values[count])
             arr_values.append((code, date, open, close, high, low, volume))
             count = count + 1
             print("Date: " + date + " Code: " + code)
@@ -404,8 +411,8 @@ def _is_zrzt(item, ye_item):
     else:
         return False
 
-# caculateMarketAnd2DB()
+#caculateMarketAnd2DB()
 #crawlSecurityData('2018-07-25', 100)
 #crawlSecurityData_AtFront(100)
-crawlSecurityData_AtRear(200)
+#crawlSecurityData_AtRear(200)
 #caculateMarketAnd2DB()

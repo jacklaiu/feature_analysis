@@ -2,11 +2,11 @@ from data_collection.security.feature import Dao as dao
 from base import FinanceDataSource as fds
 from base import HtmlGetter as hg
 import tushare as ts
-
+import base.FinanceDataSource as fd
 DateCount = 200
 
 # 在交易后的晚上执行
-def getWencaiCodesForGettingDataAndSave2DB(date):
+def getWencaiCodesForGettingDataAndSave2DB(date=fd.getLastestOpenDate()):
     count = 0
     while True:
         if count < 151:
@@ -48,4 +48,4 @@ def getWencaiCodesForGettingDataAndSave2DB(date):
         count = count + 1
         date = ye_date
 
-getWencaiCodesForGettingDataAndSave2DB("2018-07-20")
+#getWencaiCodesForGettingDataAndSave2DB("2018-07-20")

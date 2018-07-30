@@ -50,8 +50,11 @@ def getSoupsFromWencai(w):
         html = browser.execute_script("return document.documentElement.outerHTML")
         soup = BeautifulSoup(html, "html.parser")
         ret.append(soup)
-        next = browser.find_element_by_css_selector("#pageBar #next")
-        if next.tag_name is not None:
+        try:
+            next = browser.find_element_by_css_selector("#pageBar #next")
+        except:
+            next = None
+        if next is not None and next.tag_name is not None:
             try:
                 next.click()
             except:
@@ -64,7 +67,6 @@ def getSoupsFromWencai(w):
         else:
             return ret
     except Exception as e:
-        browser.close()
         return None
     finally:
         browser.close()
