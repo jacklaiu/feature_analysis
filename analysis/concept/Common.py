@@ -27,23 +27,28 @@ def getZhangTingCodeConceptAnd2DB(date=fd.getLastestOpenDate()):
             count = count + 1
 
 def get_zhangtingconcept_countMap(dayCount):
-    endDate = fd.getLastestOpenDate()
-    startDate = fd.preOpenDate(endDate, dayCount)
-    nowDate = startDate
-    ret = {}
-    while nowDate <= endDate:
-        try:
-            arr = dao.select("select count(0) count, concept from zhangting_concept where date = %s GROUP BY concept", (nowDate))
-        except Exception as e:
-            return "get_zhangtingconcept_countMap mysql error"
-        map = {}
-        for it in arr:
-            count = it['count']
-            concept = it['concept']
-            map.setdefault(concept, count)
-        ret[nowDate] = map
-        nowDate = fd.nextOpenDate(nowDate, 1)
-    return ret
+
+    #（1）获取所有concept的集合
+    #（2）迭代concept，获取count，在特定的date
+    #（3）返回图标接受的数据model
+
+    # endDate = fd.getLastestOpenDate()
+    # startDate = fd.preOpenDate(endDate, dayCount)
+    # nowDate = startDate
+    # ret = {}
+    # while nowDate <= endDate:
+    #     try:
+    #         arr = dao.select("select count(0) count, concept from zhangting_concept where date = %s GROUP BY concept", (nowDate))
+    #     except Exception as e:
+    #         return "get_zhangtingconcept_countMap mysql error"
+    #     map = {}
+    #     for it in arr:
+    #         count = it['count']
+    #         concept = it['concept']
+    #         map.setdefault(concept, count)
+    #     ret[nowDate] = map
+    #     nowDate = fd.nextOpenDate(nowDate, 1)
+    return None
 
 
 
