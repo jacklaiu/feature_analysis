@@ -1,19 +1,19 @@
 import pymysql.cursors
 
 # Connect to the database 95.163.200.245
-connection = pymysql.connect(host='95.163.200.245',
-                             user='feature_analysis',
-                             password='queue11235813',
-                             db='feature_analysis',
-                             charset='utf8mb4',
-                             cursorclass=pymysql.cursors.DictCursor)
-
-# connection = pymysql.connect(host='localhost',
-#                              user='root',
-#                              password='123456',
+# connection = pymysql.connect(host='95.163.200.245',
+#                              user='feature_analysis',
+#                              password='queue11235813',
 #                              db='feature_analysis',
 #                              charset='utf8mb4',
 #                              cursorclass=pymysql.cursors.DictCursor)
+
+connection = pymysql.connect(host='localhost',
+                             user='root',
+                             password='123456',
+                             db='feature_analysis',
+                             charset='utf8mb4',
+                             cursorclass=pymysql.cursors.DictCursor)
 
 def updatemany(sql, arr_values):
     cursor = None

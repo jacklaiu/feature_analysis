@@ -4,7 +4,7 @@ import base.FinanceDataSource as fd
 import base.Dao as dao
 
 def getZhangTingCodeConceptAnd2DB(date=fd.getLastestOpenDate()):
-    soups = hg.getSoupsFromWencai(date + "日涨停；涨停原因；按"+date+"日首次涨停时间排序")
+    soups = hg.getSoupsFromWencai(date + "日涨跌幅>=9.89；" + date +"涨停原因；按"+date+"日首次涨停时间排序")
     for soup in soups:
         eles_codes = soup.select('#resultWrap .static_con_outer .tbody_table tr td.item div.em')
         index = 0
@@ -27,11 +27,39 @@ def getZhangTingCodeConceptAnd2DB(date=fd.getLastestOpenDate()):
             count = count + 1
 
 def get_zhangtingconcept_countMap(dayCount):
+    nowDate = fd.getLastestOpenDate()
+    #（1）获取所有concept的集合(大于1)
+    startDate = fd.preOpenDate(nowDate, dayCount)
+    rows = dao.select("select concept from zhangting_concept where date>=%s group by concept", (startDate))
+    concepts = []
+    for row in rows:
+        concept = row['concept']
+        concepts.append(concept)
 
-    #（1）获取所有concept的集合
     #（2）迭代concept，获取count，在特定的date
-    #（3）返回图标接受的数据model
+    # date = nowDate
+    # while date > startDate:
+    #     rows = dao.select("select concept, count(0) count from zhangting_concept where date=%s group by concept", (date))
+    #     for row in rows:
+    #         concept = row['concept']
+    #         count = row['count']
+    date = startDate
+    ret = {}
+    concept_count_rel = {}
 
+
+    for concept in concepts:
+        countsArr = []
+        _date = date
+        while _date <= nowDate:
+            row = dao.select("select count(0) count from zhangting_concept where date=%s and concept=%s", (_date, concept))
+            count = str(row[0]['count'])
+            countsArr.append(count)
+            _date = fd.nextOpenDate(_date, 1)
+        concept_count_rel.setdefault(concept, countsArr)
+    ret.setdefault('concept_count_rel', concept_count_rel)
+    ret.setdefault('concepts', concepts)
+    #（3）返回图标接受的数据model
     # endDate = fd.getLastestOpenDate()
     # startDate = fd.preOpenDate(endDate, dayCount)
     # nowDate = startDate
@@ -48,7 +76,13 @@ def get_zhangtingconcept_countMap(dayCount):
     #         map.setdefault(concept, count)
     #     ret[nowDate] = map
     #     nowDate = fd.nextOpenDate(nowDate, 1)
-    return None
+    dates = []
+    _date = date
+    while _date <= nowDate:
+        dates.append(_date)
+        _date = fd.nextOpenDate(_date, 1)
+    ret.setdefault('dates', dates)
+    return ret
 
 
 
@@ -64,4 +98,4 @@ def get_zhangtingconcept_countMap(dayCount):
 #         map.setdefault(c, 1)
 # date = "2018-07-24"
 
-#map = get_zhangtingconcept_countMap(10)
+get_zhangtingconcept_countMap(5)
