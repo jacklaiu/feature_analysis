@@ -60,6 +60,7 @@ def get_zhangtingconcept_countMap(dayCount):
     ret.setdefault('concept_count_rel', concept_count_rel)
     ret.setdefault('concepts', concepts)
     #（3）返回图标接受的数据model
+
     # endDate = fd.getLastestOpenDate()
     # startDate = fd.preOpenDate(endDate, dayCount)
     # nowDate = startDate
@@ -98,4 +99,3 @@ def get_zhangtingconcept_countMap(dayCount):
 #         map.setdefault(c, 1)
 # date = "2018-07-24"
 
-get_zhangtingconcept_countMap(5)
