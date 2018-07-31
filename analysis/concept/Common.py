@@ -32,6 +32,14 @@ def get_zhangtingconcept_countMap(dayCount):
     #（2）迭代concept，获取count，在特定的date
     #（3）返回图标接受的数据model
 
+    endDate = fd.getLastestOpenDate()
+    startDate = fd.preOpenDate(endDate, dayCount)
+    nowDate = startDate
+
+    concepts = dao.select("select concept from zhangting_concept where date >= %s and date <= %s group by concept", (startDate, endDate))
+    print()
+
+
     # endDate = fd.getLastestOpenDate()
     # startDate = fd.preOpenDate(endDate, dayCount)
     # nowDate = startDate
@@ -64,4 +72,4 @@ def get_zhangtingconcept_countMap(dayCount):
 #         map.setdefault(c, 1)
 # date = "2018-07-24"
 
-#map = get_zhangtingconcept_countMap(10)
+map = get_zhangtingconcept_countMap(10)
